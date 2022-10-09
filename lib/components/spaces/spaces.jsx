@@ -4,22 +4,30 @@ import * as Icons from "../icons.jsx";
 import * as Utils from "../../utils";
 import * as Yabai from "../../yabai";
 import * as Settings from "../../settings";
+import { YabaiContext } from "../YabaiContext.jsx";
+import { React } from "uebersicht";
 
 export { spacesStyles as styles } from "../../styles/components/spaces/spaces";
 
 const settings = Settings.get();
 const { displayStickyWindowsSeparately } = settings.spacesDisplay;
 
-export const Component = ({ spaces, windows, SIP, displayIndex }) => {
-  if (!spaces && !windows)
+export const Component = () => {
+  const data = React.useContext(YabaiContext);
+
+  if (!data.spaces)
     return <div className="spaces-display spaces-display--empty" />;
 
-  const displays = [...new Set(spaces.map((space) => space.display))];
-  const SIPDisabled = SIP !== "System Integrity Protection status: enabled.";
+  const displayId = parseInt(window.location.pathname.replace("/", ""));
+  const { index: displayIndex } = data.displays.find((d) => {
+    return d.id === displayId;
+  });
+  const displays = [...new Set(data.spaces.map((space) => space.display))];
+  // const SIPDisabled = SIP !== "System Integrity Protection status: enabled.";
+  const SIPDisabled = false;
 
-  const { index: currentSpaceIndex } = spaces.find((space) => {
-    const { "has-focus": hasFocus, focused: __legacyHasFocus } = space;
-    return hasFocus ?? __legacyHasFocus;
+  const { index: currentSpaceIndex } = data.spaces.find((space) => {
+    return space["has-focus"];
   });
 
   return displays.map((display, i) => {
@@ -35,16 +43,16 @@ export const Component = ({ spaces, windows, SIP, displayIndex }) => {
         {displayStickyWindowsSeparately && (
           <Stickies display={display} windows={windows} />
         )}
-        {spaces.map((space, i) => {
-          const { label, index } = space;
+        {data.spaces.map((space, i) => {
+          const { uuid, label, index } = space;
           const lastOfSpace =
-            i !== 0 && space.display !== spaces[i - 1].display;
+            i !== 0 && space.display !== data.spaces[i - 1].display;
           return (
             <Space
-              key={label?.length ? label : index}
+              // key={uuid}
               display={display}
               space={space}
-              windows={windows}
+              windows={data.windows}
               displayIndex={displayIndex}
               currentSpaceIndex={currentSpaceIndex}
               SIPDisabled={SIPDisabled}

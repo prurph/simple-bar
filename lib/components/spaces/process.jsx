@@ -1,13 +1,20 @@
 import Window from "./window.jsx";
 import * as Settings from "../../settings";
 import * as Utils from "../../utils";
+import { YabaiContext } from "../YabaiContext.jsx";
+import { React } from "uebersicht";
+const useState = React.useState;
+const useEffect = React.useEffect;
 
 export { processStyles as styles } from "../../styles/components/process";
 
 const settings = Settings.get();
 
-export const Component = ({ displayIndex, spaces, windows }) => {
+export const Component = () => {
+  const { spaces, windows, displays } = React.useContext(YabaiContext);
+
   if (!windows) return null;
+
   const { process, spacesDisplay } = settings;
   const { exclusionsAsRegex } = spacesDisplay;
   const exclusions = exclusionsAsRegex
@@ -16,13 +23,13 @@ export const Component = ({ displayIndex, spaces, windows }) => {
   const titleExclusions = exclusionsAsRegex
     ? spacesDisplay.titleExclusions
     : spacesDisplay.titleExclusions.split(", ");
+  const displayId = parseInt(window.location.pathname.replace("/", ""));
+  const { index: displayIndex } = displays.find((d) => {
+    return d.id === displayId;
+  });
   const currentSpace = spaces.find((space) => {
-    const {
-      "is-visible": isVisible,
-      visible: __legacyIsVisible,
-      display,
-    } = space;
-    return (isVisible ?? __legacyIsVisible) && display === displayIndex;
+    const { "is-visible": isVisible, display } = space;
+    return isVisible && display === displayIndex;
   });
   const { stickyWindows, nonStickyWindows } = Utils.stickyWindowWorkaround({
     windows,
