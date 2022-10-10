@@ -23,14 +23,7 @@ const Stickies = ({ display, windows }) => {
     exclusionsAsRegex,
   });
 
-  if (
-    !apps.filter((app) => {
-      const { "is-minimized": isMinimized, minimized: __legacyIsMinimized } =
-        app;
-      return !(isMinimized || __legacyIsMinimized);
-    })?.length
-  )
-    return null;
+  if (apps.every((app) => app["is-minimized"])) return null;
 
   return (
     <Uebersicht.React.Fragment>
