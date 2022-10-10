@@ -1,21 +1,12 @@
 import * as Uebersicht from "uebersicht";
 import OpenedApps from "./opened-apps.jsx";
-import SpaceOptions from "./space-options.jsx";
 import * as Utils from "../../utils";
 import * as Yabai from "../../yabai";
 import * as Settings from "../../settings";
 
 const settings = Settings.get();
 
-const Space = ({
-  space,
-  display,
-  windows,
-  displayIndex,
-  currentSpaceIndex,
-  SIPDisabled,
-  lastOfSpace,
-}) => {
+const Space = ({ space, display, windows, currentSpaceIndex, SIPDisabled }) => {
   const labelRef = Uebersicht.React.useRef();
   const [hovered, setHovered] = Uebersicht.React.useState(false);
   const [noDelay, setNoDelay] = Uebersicht.React.useState(false);
@@ -40,7 +31,8 @@ const Space = ({
     hideDuplicateAppsInSpaces,
     showOptionsOnHover,
   } = spacesDisplay;
-  if (!displayAllSpacesOnAllScreens && display !== space.display) return null;
+  if (!displayAllSpacesOnAllScreens && display.index !== space.display)
+    return null;
 
   const exclusions = exclusionsAsRegex
     ? spacesDisplay.exclusions
@@ -69,7 +61,7 @@ const Space = ({
       labelRef.current?.select();
       return;
     }
-    if (hasFocus || __legacyHasFocus) return;
+    if (hasFocus) return;
     if (SIPDisabled && !spacesDisplay.switchSpacesWithoutYabai) {
       Yabai.goToSpace(index);
       return;
@@ -124,9 +116,6 @@ const Space = ({
 
   return (
     <Uebersicht.React.Fragment>
-      {spacesDisplay.displayAllSpacesOnAllScreens && lastOfSpace && (
-        <div className="spaces__separator" />
-      )}
       <div
         className={classes}
         onMouseLeave={onMouseLeave}
@@ -148,13 +137,6 @@ const Space = ({
           />
           <OpenedApps apps={displayStickyWindowsSeparately ? apps : allApps} />
         </button>
-        {SIPDisabled && (
-          <SpaceOptions
-            index={index}
-            setHovered={setHovered}
-            displayIndex={displayIndex}
-          />
-        )}
       </div>
     </Uebersicht.React.Fragment>
   );

@@ -26,15 +26,11 @@ import * as DataWidgetLoader from "./lib/components/data/data-widget-loader.jsx"
 import * as DataWidget from "./lib/components/data/data-widget.jsx";
 import * as Utils from "./lib/utils";
 import * as Settings from "./lib/settings";
-import { YabaiCtx } from "./lib/components/YabaiContext.jsx";
+import { YabaiContextWrapper } from "./lib/components/YabaiContext.jsx";
 const refreshFrequency = false;
 
 const settings = Settings.get();
-const { yabaiPath = "/opt/homebrew/bin/yabai", shell } = settings.global;
 const { processWidget } = settings.widgets;
-
-// const initSh = `${shell} /Users/prescott/Library/Application\\ Support/Übersicht/widgets/simple-bar/lib/scripts/init.sh ${yabaiPath}`;
-// run(initSh);
 
 Utils.injectStyles("simple-bar-index-styles", [
   Variables.styles,
@@ -65,7 +61,7 @@ Utils.injectStyles("simple-bar-index-styles", [
   DataWidgetLoader.styles,
 ]);
 
-const render = ({ output, error }) => {
+const render = ({ _output, error }) => {
   const baseClasses = Utils.classnames("simple-bar", {
     "simple-bar--floating": settings.global.floatingBar,
     "simple-bar--no-bar-background": settings.global.noBarBg,
@@ -80,20 +76,6 @@ const render = ({ output, error }) => {
     console.error("Error in spaces.jsx", error);
     return <Error.Component type="error" classes={baseClasses} />;
   }
-  // if (!output) return <Error.Component type="noOutput" classes={baseClasses} />;
-  // if (Utils.cleanupOutput(output) === "yabaiError") {
-  //   return <Error.Component type="yabaiError" classes={baseClasses} />;
-  // }
-
-  // const data = Utils.parseJson(output);
-  // if (!data) return <Error.Component type="noData" classes={baseClasses} />;
-
-  // const { displays, shadow, SIP, spaces, windows } = data;
-
-  // const displayId = parseInt(window.location.pathname.replace("/", ""));
-  // const { index: displayIndex } = displays.find((d) => {
-  //   return d.id === displayId;
-  // });
 
   const classes = Utils.classnames(baseClasses, {
     // "simple-bar--no-shadow": shadow !== "on",
@@ -103,21 +85,10 @@ const render = ({ output, error }) => {
   Utils.handleBarFocus();
 
   return (
-    <YabaiCtx>
+    <YabaiContextWrapper>
       <div className={classes}>
-        <Spaces.Component
-        // spaces={spaces}
-        // windows={windows}
-        // SIP={SIP}
-        // displayIndex={displayIndex}
-        />
-        {processWidget && (
-          <Process.Component
-          // displayIndex={displayIndex}
-          // spaces={spaces}
-          // windows={windows}
-          />
-        )}
+        <Spaces.Component />
+        {processWidget && <Process.Component />}
         <div className="simple-bar__data">
           <Settings.Wrapper />
           <UserWidgets />
@@ -140,31 +111,8 @@ const render = ({ output, error }) => {
           <Dnd.Widget />
         </div>
       </div>
-    </YabaiCtx>
+    </YabaiContextWrapper>
   );
 };
 
-// var socket;
-
-// const init = (dispatch) => {
-//   if (typeof socket === "undefined") {
-//     socket = new WebSocket("ws://localhost:9090");
-//     socket.addEventListener("message", (event) => {
-//       dispatch({ type: "SPACES_JSON_UPDATED", data: event.data });
-//     });
-//   }
-// };
-
-// const updateState = (event, prev = {}) => {
-//   switch (event.type) {
-//     case "SPACES_JSON_UPDATED": {
-//       return { output: event.data };
-//     }
-//     default: {
-//       return prev;
-//     }
-//   }
-// };
-
-// export { refreshFrequency, render, init, updateState };
 export { refreshFrequency, render };

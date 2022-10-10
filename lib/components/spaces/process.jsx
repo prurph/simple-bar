@@ -3,8 +3,6 @@ import * as Settings from "../../settings";
 import * as Utils from "../../utils";
 import { YabaiContext } from "../YabaiContext.jsx";
 import { React } from "uebersicht";
-const useState = React.useState;
-const useEffect = React.useEffect;
 
 export { processStyles as styles } from "../../styles/components/process";
 
