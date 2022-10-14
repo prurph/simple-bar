@@ -6,10 +6,14 @@ import * as Yabai from "../../yabai";
 
 const settings = Settings.get();
 
-const Window = ({ window }) => {
+const Window = ({ style = {}, window }) => {
   const ref = Uebersicht.React.useRef();
-  const { displayOnlyCurrent, hideWindowTitle, displayOnlyIcon } =
-    settings.process;
+  const {
+    displayOnlyCurrent,
+    hideWindowTitle,
+    displayOnlyIcon,
+    hideMinimized,
+  } = settings.process;
   const {
     "is-minimized": isMinimized,
     "has-focus": hasFocus,
@@ -17,12 +21,14 @@ const Window = ({ window }) => {
     title,
     id,
   } = window;
-  if (isMinimized || (displayOnlyCurrent && !hasFocus)) return null;
+  if ((isMinimized && hideMinimized) || (displayOnlyCurrent && !hasFocus))
+    return null;
   const Icon = AppIcons.apps[appName] || AppIcons.apps.Default;
   const classes = Utils.classnames("process__window", {
     "process__window--focused": !displayOnlyCurrent && hasFocus,
     "process__window--only-current": displayOnlyCurrent,
     "process__window--only-icon": displayOnlyIcon,
+    "process__window--minimized": isMinimized,
   });
   const onClick = (e) => {
     !displayOnlyCurrent && Utils.clickEffect(e);
@@ -43,6 +49,7 @@ const Window = ({ window }) => {
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      style={style}
     >
       <Icon className="process__icon" />
       <span className="process__inner">

@@ -8,14 +8,9 @@ export const YabaiContextWrapper = (props = { children: [] }) => {
     const socket = new WebSocket("ws://localhost:9090");
     socket.addEventListener("message", (event) => {
       if (event.data.length === 0) return;
-      try {
-        const { type, content } = JSON.parse(event.data);
-        if (type === "SPACES_UPDATED") {
-          setValue(content);
-        }
-      } catch (err) {
-        console.error(`Error parsing data from event: ${err}`);
-        console.error(event);
+      const { type, content } = JSON.parse(event.data);
+      if (type === "SPACES_UPDATED") {
+        setValue(content);
       }
     });
     return () => socket.close();

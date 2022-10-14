@@ -1,8 +1,10 @@
 import Window from "./window.jsx";
+import Stack from "./stack.jsx";
 import * as Settings from "../../settings";
 import * as Utils from "../../utils";
 import { YabaiContext } from "../YabaiContext.jsx";
 import { React } from "uebersicht";
+import _groupBy from "lodash/groupBy";
 
 export { processStyles as styles } from "../../styles/components/process";
 
@@ -22,17 +24,16 @@ export const Component = () => {
     ? spacesDisplay.titleExclusions
     : spacesDisplay.titleExclusions.split(", ");
   const displayId = parseInt(window.location.pathname.replace("/", ""));
-  const { index: displayIndex } = displays.find((d) => {
-    return d.id === displayId;
-  });
+  const display = displays.find((d) => d.id === displayId);
+  if (!display) return;
+
   const currentSpace = spaces.find((space) => {
-    const { "is-visible": isVisible, display } = space;
-    return isVisible && display === displayIndex;
+    return space["is-visible"] && space.display === display.index;
   });
   const { stickyWindows, nonStickyWindows } = Utils.stickyWindowWorkaround({
     windows,
     uniqueApps: false,
-    currentDisplay: displayIndex,
+    currentDisplay: display.index,
     currentSpace: currentSpace?.index,
     exclusions,
     titleExclusions,
@@ -45,6 +46,12 @@ export const Component = () => {
     "process--centered": process.centered,
   });
 
+  const byStack = _groupBy(Utils.sortWindows(apps), (w) => [
+    w.frame.x,
+    w.frame.y,
+    w["stack-index"] > 0,
+  ]);
+
   return (
     <div className={classes}>
       <div className="process__container">
@@ -53,9 +60,13 @@ export const Component = () => {
             {currentSpace.type}
           </div>
         )}
-        {Utils.sortWindows(apps).map((window, i) => (
-          <Window key={i} window={window} />
-        ))}
+        {Object.values(byStack).map((windows, i) => {
+          return windows[0]["stack-index"] > 0 ? (
+            <Stack key={i} windows={windows} />
+          ) : (
+            windows.map((window, i) => <Window key={i} window={window} />)
+          );
+        })}
       </div>
     </div>
   );
